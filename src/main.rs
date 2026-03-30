@@ -3,61 +3,40 @@ use std::cmp::Ordering;
 use std::process::exit;
 use rand::Rng;
 
+fn get_user_input(user_message: &str, allowed_range_lower: u16) -> u16 {
+    loop {
+        println!( "{user_message}" );
+        let mut user_input: String = String::new();
+        io::stdin().read_line(&mut user_input).expect("ERR; Failed to read input.");
+        if user_input.trim().to_lowercase() == "q" {
+            exit(0);
+        }
+        let user_input: u16 = match user_input.trim().parse() {
+            Ok(num) => num,
+            Err(_) => { println!("Numbers only, please."); continue; },
+        };
+        if user_input <= allowed_range_lower {
+            println!("Number out of range.  Try again.");
+            continue;
+        } else {
+            return user_input;
+        }
+    }
+}
+
+
 fn main() {
     println!("Guess the number! (enter 'q' to quit)");
 
-    let mut lower_limit: u32;
-    let mut upper_limit: u32;
-
-    loop {
-        println!("Enter lower limit.");
-        let mut user_input: String = String::new();
-        io::stdin()
-            .read_line(&mut user_input)
-            .expect("ERR; Failed to read input.");
-        if user_input.trim().to_lowercase() == "q" {
-            exit(0);
-        }
-        lower_limit = match user_input.trim().parse() {
-            Ok(num) => num,
-            Err(_) => { println!("Numbers only, please."); continue; },
-        };
-        if lower_limit <= 0 {
-            println!("Number greater than zero, please.");
-            continue;
-        } else {
-            break;
-        }
-    }
-
-    loop {
-        println!("Enter upper limit.");
-        let mut user_input: String = String::new();
-        io::stdin()
-            .read_line(&mut user_input)
-            .expect("ERR; Failed to read input.");
-        if user_input.trim().to_lowercase() == "q" {
-            exit(0);
-        }
-        upper_limit = match user_input.trim().parse() {
-            Ok(num) => num,
-            Err(_) => { println!("Numbers only, please."); continue; },
-        };
-        if upper_limit <= lower_limit {
-            println!("Upper limit must be greater than lower limit.");
-            continue;
-        } else {
-            break;
-        }
-    }
+    let lower_limit = get_user_input("Enter lower limit.", 0);
+    let upper_limit = get_user_input("Enter upper limit.", lower_limit);
 
     //let secret_number = rand::thread_rng().gen_range(1..=100);
     let secret_number = rand::thread_rng().gen_range(lower_limit ..= upper_limit);
-    //println!("The secret number is: {secret_number}");
+    //println!("The secret number is: {secret_number} (shhh)");
 
-    let mut guess;  // Has to be a string, not an int,
+    let mut guess;  // Has to be a string (not an int) because we are getting user input.
     loop {
-        //guess = String::new();
         guess = "".to_string();
         // because we're accepting input from the user, and read_line() below returns a string.
         println!("Please input your guess (a number between {lower_limit} and {upper_limit}, or 'q' to quit).");
@@ -72,7 +51,7 @@ fn main() {
         }
 
         //let guess: u32 = guess.trim().parse().expect("ERR; Please type a number.");
-        let guess: u32 = match guess.trim().parse() {
+        let guess: u16 = match guess.trim().parse() {
             Ok(num) => num,
             Err(_) => { println!("Number only, please."); continue; },
         };
